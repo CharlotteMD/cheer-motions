@@ -28,6 +28,12 @@ h1 {
   text-align: center;
 }
 
+h2 {
+    font-family: var(--graduate-font);
+    color: var(--gold);
+    font-size: 24px;
+}
+
 .buttonContainer {
     width: 100px;
 }
