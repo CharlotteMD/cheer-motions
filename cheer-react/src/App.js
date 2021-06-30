@@ -22,12 +22,16 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [start, setStart] = useState(false);
+  const [bestPrediction, setBestPrediction] = useState();
   
   // Set this to false when pushing to prod - turned down the interval so I dont overheat computer
   const development = true;
-  const seconds = development ? 5000 : 100;
+  const seconds = development ? 500 : 100;
 
-  let model, maxPredictions, sequence;
+
+  let model, maxPredictions, highestProbability;
+
+  let sequence = [];
 
   const toggle = () => {
     setStart(!start);
@@ -78,14 +82,11 @@ function App() {
     const { pose, posenetOutput } = await model.estimatePose(video);
     // Prediction 2: run input through teachable machine classification model
     const prediction = await model.predict(posenetOutput);
+    highestProbability = prediction.sort((a, b) => b.probability - a.probability)[0];
 
-    console.log(prediction);
-
-    // const highestProbability = prediction.reduce((a, b) => a.probability > b.probability ? a : b);
-    // const highestProbability = Math.max.apply(Math, prediction.map(function(a) { return a.probability}));
-
-    const highestProbability = prediction.sort((a, b) => b.probability - a.probability)[0];
-    console.log(highestProbability);
+    if (sequence.length === 0 | sequence[sequence.length - 1] !== highestProbability.className) {
+      sequence.push(highestProbability.className);
+    }
 }
 
 async function getMyModel() {
@@ -100,13 +101,32 @@ useEffect(() => {
   };
 }, [start])
 
+// this isnt working :-/
+
+// useEffect(() => {
+//   if (highestProbability) {
+//     console.log('here', highestProbability)
+//     console.log('here2', highestProbability.className)
+//     setBestPrediction(highestProbability.className)
+//   } else {
+//     console.log('there', highestProbability)
+//     console.log('there2', highestProbability)
+//   }
+
+// }, [highestProbability])
+
+// useEffect(() => {
+//   console.log('bp', bestPrediction)
+// }, [bestPrediction])
+
   return (
     <div className="App">
       <main>
         <h1>Cheer Sequence Pose Machine</h1>
         <button onClick={() => toggle()}>
-            {start ? "Stop" : "Start"}
-          </button>
+          {start ? "Stop" : "Start"}
+        </button>
+        {/* <h2>{bestPrediction}</h2> */}
         { start && ( 
           <div className="webcamContainer">
             <Webcam
