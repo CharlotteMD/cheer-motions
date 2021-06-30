@@ -28,11 +28,11 @@ function App() {
       scale: 0.5,
     });
     setInterval(() => {
-      detect(net)
-    }, 1000)
+      detect(net);
+    }, 100)
   }
 
-
+  // Detects movement on the webcam
   const detect = async(net) => {
     if (typeof webcamRef.current !== 'undefined' && webcamRef.current !== null && webcamRef.current.video.readyState === 4 ) {
       const video = webcamRef.current.video;
@@ -43,8 +43,18 @@ function App() {
       webcamRef.current.video.height = videoHeight;
 
       const pose = await net.estimateSinglePose(video);
-      console.log(pose);
+      drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
     }
+  }
+
+  // draw the poses on the canvas
+  const drawCanvas = (pose, video, videoWidth, videoHeight, canvas) => {
+    const ctx = canvas.current.getContext('2d');
+    canvas.current.width = videoWidth;
+    canvas.current.height = videoHeight;
+
+    drawKeypoints(pose['keypoints'], 0.5, ctx);
+    drawSkeleton(pose['keypoints'], 0.5, ctx);
   }
 
   runTfPose();
