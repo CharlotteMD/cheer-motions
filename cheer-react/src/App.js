@@ -21,11 +21,9 @@ function App() {
 
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-  const [loaded, setLoaded] = useState(false);
   const [start, setStart] = useState(false);
   
-
-  // Set this to false when pushing to prod
+  // Set this to false when pushing to prod - turned down the interval so I dont overheat computer
   const development = true;
   const seconds = development ? 5000 : 100;
 
@@ -37,7 +35,6 @@ function App() {
 
   // Load TF Pose
   const runTfPose = async (model) => {
-    setLoaded(true);
     const net = await posenet.load({
       inputResolution:{width: 640, height: 500},
       scale: 0.5,
@@ -121,16 +118,11 @@ async function getMyModel() {
   runTfPose(model);
 }
 
-// getMyModel();
-
 useEffect(() => {
   if (start) {
     getMyModel(); 
   };
 }, [start])
-  
-
-  
 
   return (
     <div className="App">
