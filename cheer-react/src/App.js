@@ -23,6 +23,7 @@ function App() {
   const canvasRef = useRef(null);
   const [start, setStart] = useState(false);
   const [bestPrediction, setBestPrediction] = useState();
+  const [routine, setRoutine] = useState([]);
   
   // Set this to false when pushing to prod - turned down the interval so I dont overheat computer
   const development = true;
@@ -87,6 +88,10 @@ function App() {
     if (sequence.length === 0 | sequence[sequence.length - 1] !== highestProbability.className) {
       sequence.push(highestProbability.className);
     }
+
+    console.log(sequence);
+
+    setRoutine(sequence);
 }
 
 async function getMyModel() {
@@ -119,6 +124,10 @@ useEffect(() => {
 //   console.log('bp', bestPrediction)
 // }, [bestPrediction])
 
+useEffect(() => {
+  console.log('rout', routine)
+}, [routine])
+
   return (
     <div className="App">
       <main>
@@ -126,7 +135,15 @@ useEffect(() => {
         <button onClick={() => toggle()}>
           {start ? "Stop" : "Start"}
         </button>
-        {/* <h2>{bestPrediction}</h2> */}
+        {routine && (
+          <ul>{routine.map(step => {
+            return (
+              <li>{step}</li>
+            )
+          })}
+          </ul>
+        )}
+        
         { start && ( 
           <div className="webcamContainer">
             <Webcam
