@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
+import * as tmPose from '@teachablemachine/pose';
 import Webcam from 'react-webcam';
 
 // import ml5 from "ml5";
@@ -21,19 +22,21 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
 
+  let model;
+
   // Load TF Pose
-  const runTfPose = async () => {
+  const runTfPose = async (model) => {
     const net = await posenet.load({
       inputResolution:{width: 640, height: 500},
       scale: 0.5,
     });
     setInterval(() => {
-      detect(net);
+      detect(net, model);
     }, 100)
   }
 
   // Detects movement on the webcam
-  const detect = async(net) => {
+  const detect = async(net, model) => {
     if (typeof webcamRef.current !== 'undefined' && webcamRef.current !== null && webcamRef.current.video.readyState === 4 ) {
       const video = webcamRef.current.video;
       const videoWidth = webcamRef.current.video.videoWidth;
@@ -44,6 +47,7 @@ function App() {
 
       const pose = await net.estimateSinglePose(video);
       drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
+      predict(video, model);
     }
   }
 
@@ -57,12 +61,52 @@ function App() {
     drawSkeleton(pose['keypoints'], 0.5, ctx);
   }
 
-  runTfPose();
+  
+  async function predict(video, model) {
+    // Prediction #1: run input through posenet
+    // estimatePose can take in an image, video or canvas html element
+    const { pose, posenetOutput } = await model.estimatePose(video);
+    // Prediction 2: run input through teachable machine classification model
+    const prediction = await model.predict(posenetOutput);
+
+
+    // for (let i = 0; i < maxPredictions; i++) {
+    //   const probability = prediction[i].probability.toFixed(2);
+    //   const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+    //   labelContainer.childNodes[i].innerHTML = classPrediction;
+        
+    //   if (probability > 0.8) {
+    //     const newMove = prediction[i].className;
+    //     if (sequence[sequence.length - 1] !== newMove) {
+    //       sequence.push(newMove)
+    //     }
+    //     console.log('Your sequence is: ', sequence)
+    //   } 
+    // }
+}
+
+async function getMyModel() {
+
+  model = await tmPose.load("./model/model.json", "./model/metadata.json");
+  
+  console.log('mod yes', model);
+  // setMyModel(model);
+
+  const maxPredictions = model.getTotalClasses();
+  console.log('max yes', maxPredictions);
+  runTfPose(model);
+}
+
+  getMyModel();
+  
+
+  
 
   return (
     <div className="App">
       <main>
         <h1>Cheer Sequence Pose Machine</h1>
+        <div className="webcamContainer">
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -92,6 +136,7 @@ function App() {
             height: 480,
           }}
         />
+        </div>
       </main>
     </div>
   );
