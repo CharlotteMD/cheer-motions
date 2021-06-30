@@ -21,18 +21,31 @@ function App() {
 
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
+  const [loaded, setLoaded] = useState(false);
+  const [start, setStart] = useState(false);
+  
 
-  let model;
+  // Set this to false when pushing to prod
+  const development = true;
+  const seconds = development ? 5000 : 100;
+
+  let model, maxPredictions, sequence;
+
+  const toggle = () => {
+    setStart(!start);
+  }
 
   // Load TF Pose
   const runTfPose = async (model) => {
+    setLoaded(true);
     const net = await posenet.load({
       inputResolution:{width: 640, height: 500},
       scale: 0.5,
     });
     setInterval(() => {
       detect(net, model);
-    }, 100)
+      // change this back to 100 ms when not in development
+    }, seconds)
   }
 
   // Detects movement on the webcam
@@ -69,35 +82,52 @@ function App() {
     // Prediction 2: run input through teachable machine classification model
     const prediction = await model.predict(posenetOutput);
 
+    console.log(prediction[0], prediction[1], prediction[2]);
 
-    // for (let i = 0; i < maxPredictions; i++) {
-    //   const probability = prediction[i].probability.toFixed(2);
-    //   const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-    //   labelContainer.childNodes[i].innerHTML = classPrediction;
+    const highestNumber = () => {
+      var keys = Object.keys(prediction);
+      var max = prediction[keys[0]];  
+
+      for (let i = 1; i < keys.length; i++) {
+        var value = prediction[keys[i]];
+        if (value > max) max = value;
+      }
+
+      console.log('maxi', max);
+
+    }
+
+    highestNumber();
+
+    for (let i = 0; i < prediction.length; i++) {
+      const probability = prediction[i].probability.toFixed(2);
+      const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+      // console.log(classPrediction)
         
-    //   if (probability > 0.8) {
-    //     const newMove = prediction[i].className;
-    //     if (sequence[sequence.length - 1] !== newMove) {
-    //       sequence.push(newMove)
-    //     }
-    //     console.log('Your sequence is: ', sequence)
-    //   } 
-    // }
+      // if (probability > 0.8) {
+      //   const newMove = prediction[i].className;
+      //   if (sequence[sequence.length - 1] !== newMove) {
+      //     sequence.push(newMove)
+      //   }
+      //   console.log('Your sequence is: ', sequence)
+      // } 
+
+    }
 }
 
 async function getMyModel() {
-
   model = await tmPose.load("./model/model.json", "./model/metadata.json");
-  
-  console.log('mod yes', model);
-  // setMyModel(model);
-
   const maxPredictions = model.getTotalClasses();
-  console.log('max yes', maxPredictions);
   runTfPose(model);
 }
 
-  getMyModel();
+// getMyModel();
+
+useEffect(() => {
+  if (start) {
+    getMyModel(); 
+  };
+}, [start])
   
 
   
@@ -106,37 +136,41 @@ async function getMyModel() {
     <div className="App">
       <main>
         <h1>Cheer Sequence Pose Machine</h1>
-        <div className="webcamContainer">
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          style={{
-            position: "absolute",
-            marginLeft: "auto",
-            marginRight: "auto",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zindex: 9,
-            width: 640,
-            height: 480,
-          }}
-        />
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: "absolute",
-            marginLeft: "auto",
-            marginRight: "auto",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zindex: 9,
-            width: 640,
-            height: 480,
-          }}
-        />
-        </div>
+        <button onClick={() => toggle()}>
+            {start ? "Stop" : "Start"}
+          </button>
+        { start && ( 
+          <div className="webcamContainer">
+            <Webcam
+              ref={webcamRef}
+              audio={false}
+              style={{
+                position: "absolute",
+                marginLeft: "auto",
+                marginRight: "auto",
+                left: 0,
+                right: 0,
+                textAlign: "center",
+                zindex: 9,
+                width: 640,
+                height: 480,
+              }}
+            />
+            <canvas
+              ref={canvasRef}
+              style={{
+                position: "absolute",
+                marginLeft: "auto",
+                marginRight: "auto",
+                left: 0,
+                right: 0,
+                textAlign: "center",
+                zindex: 9,
+                width: 640,
+                height: 480,
+              }}
+            />
+          </div>)}
       </main>
     </div>
   );

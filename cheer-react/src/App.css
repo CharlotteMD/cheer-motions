@@ -36,3 +36,5 @@ h2 {
 .webcamContainer {
   background-color: var(--blue);
 }
+
+#label-container { color: lime;}
