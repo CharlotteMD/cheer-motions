@@ -1,100 +1,88 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ml5 from "ml5";
+import * as tf from '@tensorflow/tfjs';
+import * as posenet from '@tensorflow-models/posenet';
+import Webcam from 'react-webcam';
+
+// import ml5 from "ml5";
 import useInterval from '@use-it/interval';
 import Loader from 'react-loader-spinner';
+
+import { drawKeypoints, drawSkeleton } from './utilities.js';
 
 import Pose from './Pose.js';
 import Chart from './Chart';
 import './App.css';
 
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
-
-let classifier;
+import { SGDOptimizer } from '@tensorflow/tfjs';
 
 function App() {
 
-  const videoRef = useRef();
-  const [start, setStart] = useState(false);
-  const [result, setResult] = useState([]);
-  const [loaded, setLoaded] = useState(false);
+  const webcamRef = useRef(null);
+  const canvasRef = useRef(null);
 
-  useEffect(() => {
-    classifier = ml5.imageClassifier("./model/model.json", () => {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: false })
-        .then((stream) => {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-          setLoaded(true);
-        });
+  // Load TF Pose
+  const runTfPose = async () => {
+    const net = await posenet.load({
+      inputResolution:{width: 640, height: 500},
+      scale: 0.5,
     });
-  }, []);
-
-  useInterval(() => {
-    if (classifier && start) {
-      classifier.classify(videoRef.current, (error, results) => {
-        if (error) {
-          console.error(error);
-          return;
-        }
-        console.log('there', results);
-        setResult(results);
-      });
-    }
-  }, 500);
-
-  const toggle = () => {
-    setStart(!start);
-    setResult([]);
+    setInterval(() => {
+      detect(net)
+    }, 1000)
   }
 
-  useEffect(() => {
-    if (result) {
-      console.log(result);
-    }
 
-  }, [result])
+  const detect = async(net) => {
+    if (typeof webcamRef.current !== 'undefined' && webcamRef.current !== null && webcamRef.current.video.readyState === 4 ) {
+      const video = webcamRef.current.video;
+      const videoWidth = webcamRef.current.video.videoWidth;
+      const videoHeight = webcamRef.current.video.videoHeight;
+
+      webcamRef.current.video.width = videoWidth;
+      webcamRef.current.video.height = videoHeight;
+
+      const pose = await net.estimateSinglePose(video);
+      console.log(pose);
+    }
+  }
+
+  runTfPose();
 
   return (
     <div className="App">
       <main>
         <h1>Cheer Sequence Pose Machine</h1>
-        <div className="container">
-          <Loader
-            type="Watch"
-            color="#00BFFF"
-            height={200}
-            width={200}
-            visible={!loaded}
-            style={{display:'flex', justifyContent:'center', marginTop:'30px' }}
-          />
-          <div className="upper">
-            <div className="capture">
-              <video
-                ref={videoRef}
-                style={{ transform: "scale(-1, 1)" }}
-                width="300"
-                height="150"
-              />
-              {loaded && (
-                <button onClick={() => toggle()}>
-                  {start ? "Stop" : "Start"}
-                </button>
-              )}
-          </div>
-          {/* {result.length > 0 && (
-            <div>
-              <Chart data={result[0]} />
-            </div>
-          )}
-          {result.length > 0 && (
-            <div className="results">
-              <Pose data={result} />
-            </div>
-          )} */}
-        </div>
-      </div>
-    </main>
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          style={{
+            position: "absolute",
+            marginLeft: "auto",
+            marginRight: "auto",
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            zindex: 9,
+            width: 640,
+            height: 480,
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            marginLeft: "auto",
+            marginRight: "auto",
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            zindex: 9,
+            width: 640,
+            height: 480,
+          }}
+        />
+      </main>
     </div>
   );
 }
