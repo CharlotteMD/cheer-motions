@@ -1,0 +1,282 @@
+import React, { useEffect, useRef, useState } from 'react';
+import * as tf from '@tensorflow/tfjs';
+import * as posenet from '@teachablemachine/pose';
+import Webcam from 'react-webcam';
+
+// import ml5 from "ml5";
+import useInterval from '@use-it/interval';
+import Loader from 'react-loader-spinner';
+
+import { drawKeypoints, drawSkeleton } from './utilities.js';
+
+import Pose from './Pose.js';
+import Chart from './Chart';
+import './App.css';
+
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+
+function App() {
+
+  // const videoRef = useRef();
+  const webcamRef = useRef();
+  const canvasRef = useRef();
+  // const [start, setStart] = useState(false);
+  // const [result, setResult] = useState([]);
+  // const [loaded, setLoaded] = useState(false);
+  // const [myModel, setMyModel] = useState();
+  
+  // const toggle = () => {
+  //   setStart(!start);
+  //   setResult([]);
+  // }
+
+  // let classifier;
+  // let model;
+  // // let ctx, labelContainer, maxPredictions;
+  // let sequence = [];
+  // const flip = true;
+  // const size = 500;
+  // let webcam = new tmPose.Webcam(size, size, flip);
+
+  const detect = async (net) => {
+    if (
+      typeof webcamRef.current !== "undefined" &&
+      webcamRef.current !== null &&
+      webcamRef.current.video.readyState === 4
+    ) {
+      // Get Video Properties
+      const video = webcamRef.current.video;
+      const videoWidth = webcamRef.current.video.videoWidth;
+      const videoHeight = webcamRef.current.video.videoHeight;
+
+      // Set video width
+      webcamRef.current.video.width = videoWidth;
+      webcamRef.current.video.height = videoHeight;
+
+      // Make Detections
+      const pose = await net.estimateSinglePose(video);
+      console.log(pose);
+
+      drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
+    }
+  };
+  
+
+  //  Load posenet
+  const runPosenet = async () => {
+    const net = await posenet.load({
+      inputResolution: { width: 640, height: 480 },
+      scale: 0.8,
+    });
+    //
+    setInterval(() => {
+      detect(net);
+    }, 100);
+  };
+
+  async function predict() {
+    // Prediction #1: run input through posenet
+    // console.log(myModel);
+    // estimatePose can take in an image, video or canvas html element
+    // console.log('wc', webcam);
+    // console.log('vr', videoRef.current);
+    // console.log('model', model)
+    
+    // const { pose, posenetOutput } = await model.estimatePose(videoRef.current);
+    // console.log('pose', pose)
+    // Prediction 2: run input through teachable machine classification model
+    // const prediction = await myModel.predict(posenetOutput);
+
+    // for (let i = 0; i < maxPredictions; i++) {
+    //     const probability = prediction[i].probability.toFixed(2);
+    //     const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+    //     // labelContainer.childNodes[i].innerHTML = classPrediction;
+        
+    //     if (probability > 0.8) {
+    //         const newMove = prediction[i].className;
+    //         if (sequence[sequence.length - 1] !== newMove) {
+    //             sequence.push(newMove)
+    //         }
+    //         console.log('Your sequence is: ', sequence)
+    //     }   
+    //   }
+    // finally draw the poses
+    // drawPose(pose);
+  }
+
+  const drawCanvas = (pose, video, videoWidth, videoHeight, canvas) => {
+    const ctx = canvas.current.getContext("2d");
+    canvas.current.width = videoWidth;
+    canvas.current.height = videoHeight;
+
+    drawKeypoints(pose["keypoints"], 0.6, ctx);
+    drawSkeleton(pose["keypoints"], 0.7, ctx);
+  };
+
+  runPosenet();
+
+  async function loop(timestamp) {
+    // webcam.update(); // update the webcam frame
+    await predict();
+    window.requestAnimationFrame(loop);
+  }
+
+  function setUpWebcam() {
+    navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then((stream) => {
+          // videoRef.current.srcObject = stream;
+          // videoRef.current.play();
+          setLoaded(true);
+          window.requestAnimationFrame(loop);
+        });
+        
+  }
+
+  async function getMyModel() {
+
+    // model = await tmPose.load("./model/model.json", "./model/metadata.json");
+    
+    console.log('mod yes', model);
+    setMyModel(model);
+
+    const maxPredictions = model.getTotalClasses();
+    console.log('max yes', maxPredictions);
+    
+  }
+
+  useEffect(() => {
+    getMyModel()
+    setUpWebcam()
+    
+  }, []);
+
+  return (
+    <div className="App">
+      <main>
+        <h1>Cheer Sequence Pose Machine</h1>
+        <div className="container">
+        <Loader
+            type="Watch"
+            color="#00BFFF"
+            height={200}
+            width={200}
+            visible={!loaded}
+            style={{display:'flex', justifyContent:'center', marginTop:'30px' }}
+          />
+          <div className="upper">
+            <div className="capture">
+              {/* <video
+                ref={videoRef}
+                style={{ transform: "scale(-1, 1)" }}
+                width="300"
+                height="150"
+              /> */}
+              <Webcam
+                ref={webcamRef}
+                audio={false}
+                style={{
+                  position: "absolute",
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                  left: 0,
+                  right: 0,
+                  textAlign: "center",
+                  zindex: 9,
+                  width: 640,
+                  height: 480,
+                }}
+              />
+              <canvas
+                ref={canvasRef}
+                style={{
+                  position: "absolute",
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                  left: 0,
+                  right: 0,
+                  textAlign: "center",
+                  zindex: 9,
+                  width: 640,
+                  height: 480,
+                }}
+              />
+            <div>
+          </div>
+          {/* <div id="label-container"></div>
+          {loaded && (
+            <button onClick={() => toggle()}>
+              {start ? "Stop" : "Start"}
+            </button>
+          )}
+          </div>
+          {result.length > 0 && (
+            <div>
+              <Chart data={result[0]} />
+            </div>
+          )}
+          {result.length > 0 && (
+            <div className="results">
+              <Pose data={result} />
+            </div>
+          )}  */}
+          </div>
+        </div>
+      </div>
+    </main>
+    </div>
+  );
+}
+
+export default App;
+
+  // function drawPose(pose) {
+  //   if (webcam.canvas) {
+  //       ctx.drawImage(webcam.canvas, 0, 0);
+  //       // draw the keypoints and skeleton
+  //       if (pose) {
+  //           const minPartConfidence = 0.5;
+  //           tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
+  //           tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
+  //       }
+  //   }
+  // }
+
+
+
+    
+
+
+  // useInterval(() => {
+    
+  //   if (myModel && start) {
+  //     const classifier = myModel;
+  //     console.log('int')
+  //     console.log('class', classifier)
+  //     classifier.classify(videoRef.current, (error, results) => {
+  //       if (error) {
+  //         console.error(error);
+  //         return;
+  //       }
+  //       console.log('res', results);
+  //       predict();
+
+  //     });
+  //   }
+  // }, 500);
+
+  // useInterval(() => {
+  //   if (classifier && start) {
+  //     console.log('int')
+  //     console.log('class', classifier)
+  //     classifier.classify(videoRef.current, (error, results) => {
+  //       if (error) {
+  //         console.error(error);
+  //         return;
+  //       }
+  //       setResult(results);
+  //       console.log('res', results);
+  //       predict();
+  //     });
+  //   }
+  // }, 500);
