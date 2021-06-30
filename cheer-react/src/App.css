@@ -27,14 +27,18 @@ h1 {
   text-align: center;
   }
 
-h2 {
+ul {
+  display: flex;
+  justify-content: space-evenly;
+  list-style: none;
+}
+
+li {
   font-family: var(--graduate-font);
   color: var(--gold);
   font-size: 24px;
+  padding-right: 8px;
 }
 
-.webcamContainer {
-  background-color: var(--blue);
-}
 
-#label-container { color: lime;}
+

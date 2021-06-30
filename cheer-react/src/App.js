@@ -131,17 +131,20 @@ useEffect(() => {
   return (
     <div className="App">
       <main>
-        <h1>Cheer Sequence Pose Machine</h1>
+        <h1>Cheer Routine Machine</h1>
         <button onClick={() => toggle()}>
           {start ? "Stop" : "Start"}
         </button>
-        {routine && (
+        {routine && routine.length > 1 && (
+          <>
+          <h2>My routine: </h2>
           <ul>{routine.map(step => {
             return (
               <li>{step}</li>
             )
           })}
           </ul>
+          </>
         )}
         
         { start && ( 
