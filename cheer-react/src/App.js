@@ -79,37 +79,13 @@ function App() {
     // Prediction 2: run input through teachable machine classification model
     const prediction = await model.predict(posenetOutput);
 
-    console.log(prediction[0], prediction[1], prediction[2]);
+    console.log(prediction);
 
-    const highestNumber = () => {
-      var keys = Object.keys(prediction);
-      var max = prediction[keys[0]];  
+    // const highestProbability = prediction.reduce((a, b) => a.probability > b.probability ? a : b);
+    // const highestProbability = Math.max.apply(Math, prediction.map(function(a) { return a.probability}));
 
-      for (let i = 1; i < keys.length; i++) {
-        var value = prediction[keys[i]];
-        if (value > max) max = value;
-      }
-
-      console.log('maxi', max);
-
-    }
-
-    highestNumber();
-
-    for (let i = 0; i < prediction.length; i++) {
-      const probability = prediction[i].probability.toFixed(2);
-      const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-      // console.log(classPrediction)
-        
-      // if (probability > 0.8) {
-      //   const newMove = prediction[i].className;
-      //   if (sequence[sequence.length - 1] !== newMove) {
-      //     sequence.push(newMove)
-      //   }
-      //   console.log('Your sequence is: ', sequence)
-      // } 
-
-    }
+    const highestProbability = prediction.sort((a, b) => b.probability - a.probability)[0];
+    console.log(highestProbability);
 }
 
 async function getMyModel() {
