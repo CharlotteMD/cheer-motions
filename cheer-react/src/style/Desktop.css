@@ -20,7 +20,7 @@ main {
 
 h1 {
   font-family: var(--graduate-font);
-  color: var(--gold);
+  color: var(--white);
   -webkit-text-stroke-width: 0.5px;
   -webkit-text-stroke-color: var(--navy);
   font-size: 40px;
