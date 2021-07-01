@@ -13,9 +13,4 @@
     ul {
       grid-template-columns: repeat(2, 1fr);
     }
-
-    /* .routineImage {
-      height: 100px;
-      width: 100px;
-    } */
   }
