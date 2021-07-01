@@ -19,13 +19,13 @@ import './style/Mobile.css';
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { SGDOptimizer } from '@tensorflow/tfjs';
 
-import MotionClap from './assets/motions/clap.png';
-import MotionHips from './assets/motions/hips.png';
-import MotionL from './assets/motions/l.png';
-import MotionLowV from './assets/motions/low-v.png';
-import MotionPunch from './assets/motions/punch.png';
-import MotionT from './assets/motions/t.png';
-import MotionV from './assets/motions/v.png';
+import Clap from './assets/motions/clap.png';
+import Hips from './assets/motions/hips.png';
+import L from './assets/motions/l.png';
+import LowV from './assets/motions/low-v.png';
+import Punch from './assets/motions/punch.png';
+import T from './assets/motions/t.png';
+import V from './assets/motions/v.png';
 
 function App() {
 
@@ -159,13 +159,13 @@ useEffect(() => {
             <p>Our app understands the following motions:</p>
             <br />
             <div className='motionsContainer'>
-              <img src={MotionClap} className='motionsImage' alt="Clap"/>
-              <img src={MotionHips} className='motionsImage' alt="Hips"/>
-              <img src={MotionL} className='motionsImage' alt="L"/>
-              <img src={MotionLowV} className='motionsImage' alt="Low V"/>
-              <img src={MotionPunch} className='motionsImage' alt="Punch"/>
-              <img src={MotionT} className='motionsImage' alt="T"/>
-              <img src={MotionV} className='motionsImage' alt="V"/>
+              <img src={Clap} className='motionsImage' alt="Clap"/>
+              <img src={Hips} className='motionsImage' alt="Hips"/>
+              <img src={L} className='motionsImage' alt="L"/>
+              <img src={LowV} className='motionsImage' alt="Low V"/>
+              <img src={Punch} className='motionsImage' alt="Punch"/>
+              <img src={T} className='motionsImage' alt="T"/>
+              <img src={V} className='motionsImage' alt="V"/>
             </div>
             <br />
             <p>When you are ready, press start and perform your routine.</p>
@@ -178,7 +178,18 @@ useEffect(() => {
             <h2>My routine: </h2>
             <ul>{routine.map(step => {
               return (
-                <li>{step}</li>
+                <li>
+                  {step === "V" && (
+                    <img src={V} className='routineImage' alt={step}/>
+                  )}
+                  {step === "Clap" && (
+                    <img src={Clap} className='routineImage' alt={step}/>
+                  )}
+                  {step === "T" && (
+                    <img src={T} className='routineImage' alt={step}/>
+                  )}
+                  
+                </li>
               )
             })}
             </ul>

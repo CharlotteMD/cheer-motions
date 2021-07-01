@@ -1,7 +1,12 @@
-@media (max-width: 750px) { 
+@media (max-width: 780px) { 
     .motionsContainer {
       grid-column-gap: 8px;
       grid-row-gap: 8px;
       margin: 0 auto;
+    }
+
+    .routineImage {
+      height: 130px;
+      width: 130px;
     }
   }
