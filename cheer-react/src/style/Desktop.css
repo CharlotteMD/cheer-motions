@@ -11,9 +11,9 @@
 
 main {
   background: var(--blue);
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   font-family: var(--open-font);
 }
@@ -39,6 +39,29 @@ li {
   font-size: 24px;
   padding-right: 8px;
 }
+
+.instructionsContainer {
+  background: var(--white);
+  margin: 24px;
+  padding: 24px;
+  border: solid 2px var(--gold);
+}
+
+.motionsContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-column-gap: 16px;
+  grid-row-gap: 16px;
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+.motionsImage {
+  grid-area: span 1;
+  height: 100px;
+  width: 100px;
+}
+
 
 
 

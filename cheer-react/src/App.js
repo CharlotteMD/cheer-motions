@@ -12,10 +12,20 @@ import { drawKeypoints, drawSkeleton } from './utilities.js';
 
 import Pose from './Pose.js';
 import Chart from './Chart';
-import './App.css';
+import './style/Desktop.css';
+import './style/Tablet.css';
+import './style/Mobile.css';
 
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { SGDOptimizer } from '@tensorflow/tfjs';
+
+import MotionClap from './assets/motions/clap.png';
+import MotionHips from './assets/motions/hips.png';
+import MotionL from './assets/motions/l.png';
+import MotionLowV from './assets/motions/low-v.png';
+import MotionPunch from './assets/motions/punch.png';
+import MotionT from './assets/motions/t.png';
+import MotionV from './assets/motions/v.png';
 
 function App() {
 
@@ -100,9 +110,15 @@ async function getMyModel() {
   runTfPose(model);
 }
 
+async function startAgain() {
+  await setRoutine([]);
+  sequence = [];
+  getMyModel();
+}
+
 useEffect(() => {
   if (start) {
-    getMyModel(); 
+  startAgain();
   };
 }, [start])
 
@@ -135,16 +151,47 @@ useEffect(() => {
         <button onClick={() => toggle()}>
           {start ? "Stop" : "Start"}
         </button>
-        {routine && routine.length > 1 && (
+        {!start && routine.length === 0 && (
+          <div className='instructionsContainer'>
+            <h2>Welcome to Cheer Routine Machine!</h2>
+            <p>Press start to record your cheer routine, then press stop to review your motions.</p>
+            <br/>
+            <p>Our app understands the following motions:</p>
+            <br />
+            <div className='motionsContainer'>
+              <img src={MotionClap} className='motionsImage' alt="Clap"/>
+              <img src={MotionHips} className='motionsImage' alt="Hips"/>
+              <img src={MotionL} className='motionsImage' alt="L"/>
+              <img src={MotionLowV} className='motionsImage' alt="Low V"/>
+              <img src={MotionPunch} className='motionsImage' alt="Punch"/>
+              <img src={MotionT} className='motionsImage' alt="T"/>
+              <img src={MotionV} className='motionsImage' alt="V"/>
+            </div>
+            <br />
+            <p>When you are ready, press start and perform your routine.</p>
+            <p>Then press stop and review your routine.</p>
+
+          </div>
+        )}
+        {!start && routine && routine.length > 1 && (
           <>
-          <h2>My routine: </h2>
-          <ul>{routine.map(step => {
-            return (
-              <li>{step}</li>
-            )
-          })}
-          </ul>
+            <h2>My routine: </h2>
+            <ul>{routine.map(step => {
+              return (
+                <li>{step}</li>
+              )
+            })}
+            </ul>
           </>
+        )}
+        {!start && !routine && (
+        <Loader
+          type="Watch"
+          color="#00BFFF"
+          height={100}
+          width={100}
+          style={{display:'flex', justifyContent:'center', marginTop:'30px' }}
+        />
         )}
         
         { start && ( 

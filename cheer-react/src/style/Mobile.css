@@ -1,0 +1,7 @@
+@media (max-width: 450px) { 
+    .motionsContainer {
+      grid-column-gap: 4px;
+      grid-row-gap: 4px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
