@@ -4,4 +4,9 @@
       grid-row-gap: 4px;
       grid-template-columns: repeat(2, 1fr);
     }
+
+    .instructionsContainer {
+      margin: 8px;
+      padding: 8px;
+    }
   }

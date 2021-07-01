@@ -227,6 +227,9 @@ useEffect(() => {
             />
           </div>)}
       </main>
+      <footer>
+        <p>Created by Charlotte 👩🏻‍💻</p>
+    </footer>
     </div>
   );
 }
