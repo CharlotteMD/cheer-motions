@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import * as tmPose from '@teachablemachine/pose';
 import Webcam from 'react-webcam';
 
-// import ml5 from "ml5";
-import useInterval from '@use-it/interval';
 import Loader from 'react-loader-spinner';
 
 import { drawKeypoints, drawSkeleton } from './utilities.js';
@@ -17,7 +14,6 @@ import './style/Tablet.css';
 import './style/Mobile.css';
 
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
-import { SGDOptimizer } from '@tensorflow/tfjs';
 
 import Clap from './assets/motions/clap.png';
 import Hips from './assets/motions/hips.png';
@@ -34,13 +30,16 @@ function App() {
   const [start, setStart] = useState(false);
   const [bestPrediction, setBestPrediction] = useState();
   const [routine, setRoutine] = useState([]);
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
   
   // Set this to false when pushing to prod - turned down the interval so I dont overheat computer
-  const development = true;
+  const development = false;
   const seconds = development ? 500 : 100;
 
-
-  let model, maxPredictions, highestProbability;
+  let model, highestProbability, ctx;
 
   let sequence = [];
 
@@ -71,16 +70,18 @@ function App() {
       webcamRef.current.video.height = videoHeight;
 
       const pose = await net.estimateSinglePose(video);
+
       drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
+
       predict(video, model);
     }
   }
 
   // draw the poses on the canvas
-  const drawCanvas = (pose, video, videoWidth, videoHeight, canvas) => {
-    const ctx = canvas.current.getContext('2d');
-    canvas.current.width = videoWidth;
-    canvas.current.height = videoHeight;
+  const drawCanvas = (pose, videoWidth, videoHeight, canvasRef) => {
+    const ctx = canvasRef.current.getContext('2d');
+    canvasRef.current.width = videoWidth;
+    canvasRef.current.height = videoHeight;
 
     drawKeypoints(pose['keypoints'], 0.5, ctx);
     drawSkeleton(pose['keypoints'], 0.5, ctx);
@@ -118,30 +119,26 @@ async function startAgain() {
 
 useEffect(() => {
   if (start) {
-  startAgain();
+    startAgain();
   };
 }, [start])
 
-// this isnt working :-/
-
-// useEffect(() => {
-//   if (highestProbability) {
-//     console.log('here', highestProbability)
-//     console.log('here2', highestProbability.className)
-//     setBestPrediction(highestProbability.className)
-//   } else {
-//     console.log('there', highestProbability)
-//     console.log('there2', highestProbability)
-//   }
-
-// }, [highestProbability])
-
-// useEffect(() => {
-//   console.log('bp', bestPrediction)
-// }, [bestPrediction])
+useEffect(() => {
+  function handleResize() {
+    setWindowSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }
+  
+  window.addEventListener("resize", handleResize);
+  handleResize();
+  // Remove event listener on cleanup
+  return () => window.removeEventListener("resize", handleResize);
+}, []); 
 
 useEffect(() => {
-  console.log('rout', routine)
+  console.log('Routine', routine)
 }, [routine])
 
   return (
@@ -218,8 +215,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: 640,
-                height: 480,
+                width: windowSize.width,
+                height: windowSize.height,
               }}
             />
             <canvas
@@ -232,8 +229,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: 640,
-                height: 480,
+                width: windowSize.width,
+                height: windowSize.height,
               }}
             />
           </div>)}
