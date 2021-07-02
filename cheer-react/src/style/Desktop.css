@@ -97,6 +97,7 @@ footer {
   font-family: var(--open-font);
   display: flex;
   justify-content: center;
+  color: var(--white);
 }
 
 

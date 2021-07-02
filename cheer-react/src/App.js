@@ -28,12 +28,7 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [start, setStart] = useState(false);
-  const [bestPrediction, setBestPrediction] = useState();
   const [routine, setRoutine] = useState([]);
-  const [windowSize, setWindowSize] = useState({
-    width: undefined,
-    height: undefined,
-  });
   
   // Set this to false when pushing to prod - turned down the interval so I dont overheat computer
   const development = false;
@@ -53,6 +48,7 @@ function App() {
       inputResolution:{width: 640, height: 500},
       scale: 0.5,
     });
+    
     setInterval(() => {
       detect(net, model);
       // change this back to 100 ms when not in development
@@ -70,16 +66,17 @@ function App() {
       webcamRef.current.video.height = videoHeight;
 
       const pose = await net.estimateSinglePose(video);
-
-      drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
-
+      if (canvasRef.current !== 'undefined' && canvasRef.current !== null) {
+        drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
+      }
+      
       predict(video, model);
     }
   }
 
   // draw the poses on the canvas
   const drawCanvas = (pose, videoWidth, videoHeight, canvasRef) => {
-    const ctx = canvasRef.current.getContext('2d');
+    ctx = canvasRef.current.getContext('2d');
     canvasRef.current.width = videoWidth;
     canvasRef.current.height = videoHeight;
 
@@ -122,20 +119,6 @@ useEffect(() => {
     startAgain();
   };
 }, [start])
-
-useEffect(() => {
-  function handleResize() {
-    setWindowSize({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
-  }
-  
-  window.addEventListener("resize", handleResize);
-  handleResize();
-  // Remove event listener on cleanup
-  return () => window.removeEventListener("resize", handleResize);
-}, []); 
 
 useEffect(() => {
   console.log('Routine', routine)
@@ -192,17 +175,7 @@ useEffect(() => {
             </ul>
           </>
         )}
-        {!start && !routine && (
-        <Loader
-          type="Watch"
-          color="#00BFFF"
-          height={100}
-          width={100}
-          style={{display:'flex', justifyContent:'center', marginTop:'30px' }}
-        />
-        )}
-        
-        { start && ( 
+        { start && (
           <div className="webcamContainer">
             <Webcam
               ref={webcamRef}
@@ -215,8 +188,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: windowSize.width,
-                height: windowSize.height,
+                width: window.innerWidth,
+                height: window.innerHeight,
               }}
             />
             <canvas
@@ -229,8 +202,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: windowSize.width,
-                height: windowSize.height,
+                width: window.innerWidth,
+                height: window.innerHeight,
               }}
             />
           </div>)}
