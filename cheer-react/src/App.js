@@ -40,7 +40,6 @@ function App() {
   const toggle = () => {
     setStart(!start);
 
-    // need to clear routine when cam restarts - doesnt work
     if (start) {
       sequence = [];
     } else {
@@ -129,10 +128,6 @@ useEffect(() => {
 useEffect(() => {
   startAgain();
 }, [])
-
-useEffect(() => {
-  console.log('Routine', routine)
-}, [routine])
 
   return (
     <div className="App">
