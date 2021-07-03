@@ -176,6 +176,18 @@ useEffect(() => {
                   {step === "T" && (
                     <img src={T} className='routineImage' alt={step}/>
                   )}
+                  {step === "Punch" && (
+                    <img src={Punch} className='routineImage' alt={step}/>
+                  )}
+                  {step === "LowV" && (
+                    <img src={LowV} className='routineImage' alt={step}/>
+                  )}
+                  {step === "Hips" && (
+                    <img src={Hips} className='routineImage' alt={step}/>
+                  )}
+                  {step === "L" && (
+                    <img src={L} className='routineImage' alt={step}/>
+                  )}
                   
                 </li>
               )
