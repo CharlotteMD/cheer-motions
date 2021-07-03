@@ -3,11 +3,8 @@ import * as posenet from '@tensorflow-models/posenet';
 import * as tmPose from '@teachablemachine/pose';
 import Webcam from 'react-webcam';
 
-import Loader from 'react-loader-spinner';
-
 import { drawKeypoints, drawSkeleton } from './utilities.js';
 
-import Pose from './Pose.js';
 import Chart from './Chart';
 import './style/Desktop.css';
 import './style/Tablet.css';
@@ -28,7 +25,6 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [start, setStart] = useState(false);
-  // const [ctx, setCtx] = useState();
   const [routine, setRoutine] = useState([]);
   
   // Set this to false when pushing to prod - turned down the interval so I dont overheat computer
@@ -55,8 +51,6 @@ function App() {
       // change this back to 100 ms when not in development
     }, seconds)
   }
-
-
 
   // Detects movement on the webcam
   const detect = async(net, model) => {
@@ -93,12 +87,8 @@ function App() {
     predict(video, model);
   }
 
-  
   async function predict(video, model) {
-    // Prediction #1: run input through posenet
-    // estimatePose can take in an image, video or canvas html element
     const { pose, posenetOutput } = await model.estimatePose(video);
-    // Prediction 2: run input through teachable machine classification model
     const prediction = await model.predict(posenetOutput);
     highestProbability = prediction.sort((a, b) => b.probability - a.probability)[0];
 
@@ -123,7 +113,13 @@ function startAgain() {
   getMyModel();
 }
 
+useEffect(() => {
+  if (start) {
+    sequence = [];
+  }
 
+
+}, [start])
 
 useEffect(() => {
   startAgain();
