@@ -37,6 +37,13 @@ function App() {
 
   const toggle = () => {
     setStart(!start);
+
+    // need to clear routine when cam restarts - doesnt work
+    if (start) {
+      sequence = [];
+    } else {
+      setRoutine([]);
+    }
   }
 
   // Load TF Pose
@@ -112,14 +119,6 @@ function startAgain() {
   sequence = [];
   getMyModel();
 }
-
-useEffect(() => {
-  if (start) {
-    sequence = [];
-  }
-
-
-}, [start])
 
 useEffect(() => {
   startAgain();
