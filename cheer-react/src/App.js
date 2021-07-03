@@ -31,6 +31,8 @@ function App() {
   const development = false;
   const seconds = development ? 500 : 100;
 
+  const screenSize = window.innerWidth < 700 ? 300 : 500;
+
   let model, highestProbability;
 
   let sequence = [];
@@ -49,7 +51,7 @@ function App() {
   // Load TF Pose
   const runTfPose = async (model) => {
     const net = await posenet.load({
-      inputResolution:{width: 500, height: 500},
+      inputResolution:{width: screenSize, height: screenSize},
       scale: 0.5,
     });
     
@@ -155,10 +157,6 @@ useEffect(() => {
               <img src={T} className='motionsImage' alt="T"/>
               <img src={V} className='motionsImage' alt="V"/>
             </div>
-            <br />
-            <p>When you are ready, press start and perform your routine.</p>
-            <p>Then press stop and review your routine.</p>
-
           </div>
         )}
         {!start && routine && routine.length > 1 && (
@@ -208,8 +206,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: 500,
-                height: 500,
+                width: screenSize,
+                height: screenSize,
               }}
             />
             <canvas
@@ -222,8 +220,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: 500,
-                height: 500,
+                width: screenSize,
+                height: screenSize,
               }}
             />
           </div>)}
