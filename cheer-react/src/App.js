@@ -103,8 +103,6 @@ function App() {
       sequence.push(highestProbability.className);
     }
 
-    console.log(sequence);
-
     setRoutine(sequence);
 }
 
@@ -119,6 +117,12 @@ function startAgain() {
   sequence = [];
   getMyModel();
 }
+
+useEffect(() => {
+  if (start) {
+    startAgain();
+  };
+}, [start])
 
 useEffect(() => {
   startAgain();
