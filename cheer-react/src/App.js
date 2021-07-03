@@ -28,13 +28,14 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [start, setStart] = useState(false);
+  // const [ctx, setCtx] = useState();
   const [routine, setRoutine] = useState([]);
   
   // Set this to false when pushing to prod - turned down the interval so I dont overheat computer
   const development = false;
   const seconds = development ? 500 : 100;
 
-  let model, highestProbability, ctx;
+  let model, highestProbability;
 
   let sequence = [];
 
@@ -45,7 +46,7 @@ function App() {
   // Load TF Pose
   const runTfPose = async (model) => {
     const net = await posenet.load({
-      inputResolution:{width: 640, height: 500},
+      inputResolution:{width: 500, height: 500},
       scale: 0.5,
     });
     
@@ -55,9 +56,15 @@ function App() {
     }, seconds)
   }
 
+
+
   // Detects movement on the webcam
   const detect = async(net, model) => {
-    if (typeof webcamRef.current !== 'undefined' && webcamRef.current !== null && webcamRef.current.video.readyState === 4 ) {
+    if (
+      typeof webcamRef.current !== 'undefined' && 
+      webcamRef.current !== null && 
+      webcamRef.current.video.readyState === 4
+    ) {
       const video = webcamRef.current.video;
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
@@ -66,22 +73,24 @@ function App() {
       webcamRef.current.video.height = videoHeight;
 
       const pose = await net.estimateSinglePose(video);
-      if (canvasRef.current !== 'undefined' && canvasRef.current !== null) {
-        drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
-      }
-      
-      predict(video, model);
+      drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
+
     }
   }
 
   // draw the poses on the canvas
-  const drawCanvas = (pose, videoWidth, videoHeight, canvasRef) => {
-    ctx = canvasRef.current.getContext('2d');
+  const drawCanvas = (pose, video, videoWidth, videoHeight, canvasRef) => {
+    if (!canvasRef.current) {
+      return 
+    }
+    const ctx = canvasRef.current.getContext('2d');
     canvasRef.current.width = videoWidth;
     canvasRef.current.height = videoHeight;
 
     drawKeypoints(pose['keypoints'], 0.5, ctx);
     drawSkeleton(pose['keypoints'], 0.5, ctx);
+
+    predict(video, model);
   }
 
   
@@ -108,17 +117,17 @@ async function getMyModel() {
   runTfPose(model);
 }
 
-async function startAgain() {
-  await setRoutine([]);
+function startAgain() {
+  setRoutine([]);
   sequence = [];
   getMyModel();
 }
 
+
+
 useEffect(() => {
-  if (start) {
-    startAgain();
-  };
-}, [start])
+  startAgain();
+}, [])
 
 useEffect(() => {
   console.log('Routine', routine)
@@ -188,8 +197,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: window.innerWidth,
-                height: window.innerHeight,
+                width: 500,
+                height: 500,
               }}
             />
             <canvas
@@ -202,8 +211,8 @@ useEffect(() => {
                 right: 0,
                 textAlign: "center",
                 zindex: 9,
-                width: window.innerWidth,
-                height: window.innerHeight,
+                width: 500,
+                height: 500,
               }}
             />
           </div>)}
